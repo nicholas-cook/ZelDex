@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">ZelDex</string>
+
+    <string name="title_select_category">Select a Category from the Hyrule Compendium</string>
+    <string name="entry_number">Entry #%1$d</string>
+    <string name="cd_nav_back">Back</string>
+    <string name="title_category_all">Hyrule Compendium</string>
+    <string name="category_creatures">Creatures</string>
+    <string name="category_monsters">Monsters</string>
+    <string name="category_materials">Materials</string>
+    <string name="category_equipment">Equipment</string>
+    <string name="category_treasure">Treasure</string>
+    <string name="entry_title">#%1$d %2$s</string>
+    <string name="title_compendium_entry">Compendium Entry</string>
+    <string name="cd_entry_image">Image of %1$s</string>
+    <string name="title_common_locations">Common Locations &#128205;</string>
+    <string name="title_droppable_items">Droppable Items &#127890;</string>
+    <string name="title_properties">&#128481; Properties &#128737;</string>
+    <string name="body_attack">Attack: %1$d</string>
+    <string name="body_defense">Defense: %1$d</string>
+    <string name="title_cooking_effect">Cooking Effect &#127859;</string>
+    <string name="title_hearts_recovered">Hearts Recovered</string>
+    <string name="body_hearts_recovered">(when eaten raw)</string>
+    <string name="info_dlc">Note: This entry is only available in a DLC pack. &#128190;</string>
+    <string name="error_message">An error occurred. Please go back and try again.</string>
+</resources>
