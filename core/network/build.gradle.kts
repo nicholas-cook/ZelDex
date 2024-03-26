@@ -1,6 +1,5 @@
 plugins {
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.zeldex.android.library)
     id("kotlin-kapt")
     id("com.google.devtools.ksp").version("1.6.10-1.0.4")
     alias(libs.plugins.hilt)
@@ -8,32 +7,9 @@ plugins {
 
 android {
     namespace = "com.nickcook.zeldex.core.network"
-    compileSdk = 34
 
-    defaultConfig {
-        minSdk = 23
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
     buildFeatures {
         buildConfig = true
-    }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 }
 

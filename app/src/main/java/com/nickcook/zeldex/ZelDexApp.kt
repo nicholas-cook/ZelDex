@@ -34,23 +34,14 @@ fun ZelDexNavHost(navHostController: NavHostController) {
     ) {
         composable(route = ZelDexScreen.CategorySelection.route) {
             CategorySelectionRoute(onCategoryClicked = {
-                navHostController.navigate(route = "${ZelDexScreen.CompendiumList.route}/${it.categoryName}")
+                navHostController.navigate(route = NavigationEvent.NavigateToCategory(it.categoryName).route)
             })
         }
         composable(route = "${ZelDexScreen.CompendiumList.route}/{categoryName}") {
-            CompendiumListRoute(
-                onItemClicked = { entryId ->
-                    navHostController.navigate(route = "${ZelDexScreen.CompendiumEntry.route}/$entryId")
-                },
-                onNavigateUp = {
-                    navHostController.popBackStack()
-                }
-            )
+            CompendiumListRoute(navController = navHostController)
         }
         composable(route = "${ZelDexScreen.CompendiumEntry.route}/{entryId}") {
-            CompendiumEntryRoute(onNavigateUp = {
-                navHostController.popBackStack()
-            })
+            CompendiumEntryRoute(navController = navHostController)
         }
     }
 }

@@ -1,48 +1,23 @@
 package com.nickcook.zeldex.core.testing.fake
 
-import com.nickcook.zeldex.core.data.model.CompendiumCategory
 import com.nickcook.zeldex.core.data.model.CompendiumEntry
 import com.nickcook.zeldex.core.data.model.Result
 import com.nickcook.zeldex.core.data.repository.CompendiumRepository
 import com.nickcook.zeldex.core.testing.data.compendiumEntries
+import com.nickcook.zeldex.core.testing.data.monsterEntry
 
 class FakeCompendiumRepository : CompendiumRepository {
 
-    var isErrorResponse = false
+    var entriesResult: Result<List<CompendiumEntry>> = Result.Success(compendiumEntries)
+    var entryResult: Result<CompendiumEntry> = Result.Success(monsterEntry)
 
-    override suspend fun getCompendiumList(refresh: Boolean): Result<List<CompendiumEntry>> {
-        return if (isErrorResponse) {
-            Result.Error("Test exception")
-        } else {
-            Result.Success(compendiumEntries)
-        }
-    }
+    override suspend fun getCompendiumList(refresh: Boolean): Result<List<CompendiumEntry>> =
+        entriesResult
 
     override suspend fun getCategoryList(
         categoryName: String,
         refresh: Boolean
-    ): Result<List<CompendiumEntry>> {
-        return if (isErrorResponse) {
-            Result.Error("Test exception")
-        } else {
-            Result.Success(compendiumEntries.filter {
-                it.category == CompendiumCategory.fromCategoryName(
-                    categoryName
-                )
-            })
-        }
-    }
+    ): Result<List<CompendiumEntry>> = entriesResult
 
-    override suspend fun getCompendiumEntry(entryId: Int): Result<CompendiumEntry> {
-        return if (isErrorResponse) {
-            Result.Error("Test exception")
-        } else {
-            val entry = compendiumEntries.find { it.id == entryId }
-            if (entry != null) {
-                Result.Success(entry)
-            } else {
-                Result.Error("Entry not found")
-            }
-        }
-    }
+    override suspend fun getCompendiumEntry(entryId: Int): Result<CompendiumEntry> = entryResult
 }

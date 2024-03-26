@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,7 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.nickcook.zeldex.NavigationEvent
 import com.nickcook.zeldex.R
 import com.nickcook.zeldex.components.ErrorState
 import com.nickcook.zeldex.core.data.model.CompendiumCategory
@@ -53,15 +58,30 @@ import kotlin.math.ceil
 
 @Composable
 fun CompendiumEntryRoute(
-    onNavigateUp: () -> Unit,
+    navController: NavController,
     viewModel: CompendiumEntryViewModel = hiltViewModel()
 ) {
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
-    CompendiumEntryScreen(screenState = screenState, onNavigateUp = onNavigateUp)
+    val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle()
+    LaunchedEffect(key1 = navigationEvent) {
+        if (navigationEvent is NavigationEvent.NavigateBack) {
+            navController.popBackStack()
+            viewModel.onNavigated()
+        }
+    }
+    CompendiumEntryScreen(
+        screenState = screenState,
+        onTryAgainClick = viewModel::getCompendiumEntry,
+        onNavigateUp = viewModel::onBackClicked
+    )
 }
 
 @Composable
-fun CompendiumEntryScreen(screenState: CompendiumEntryScreenState, onNavigateUp: () -> Unit) {
+fun CompendiumEntryScreen(
+    screenState: CompendiumEntryScreenState,
+    onTryAgainClick: () -> Unit,
+    onNavigateUp: () -> Unit
+) {
     Scaffold(topBar = {
         EntryTopBar(onNavigateUp = onNavigateUp)
     }) { paddingValues ->
@@ -78,7 +98,7 @@ fun CompendiumEntryScreen(screenState: CompendiumEntryScreenState, onNavigateUp:
             }
 
             is CompendiumEntryScreenState.Error -> {
-                ErrorState()
+                ErrorState(onTryAgainClick = onTryAgainClick)
             }
 
             is CompendiumEntryScreenState.Success -> {
@@ -112,7 +132,10 @@ fun CompendiumEntryScreen(screenState: CompendiumEntryScreenState, onNavigateUp:
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
                     AsyncImage(
-                        model = entry.image,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(entry.image)
+                            .crossfade(300)
+                            .build(),
                         contentDescription = stringResource(
                             id = R.string.cd_entry_image,
                             entry.name
@@ -335,6 +358,7 @@ private fun CompendiumEntryScreenPreview() {
                     cookingEffect = "Increased speed"
                 )
             ),
+            onTryAgainClick = {},
             onNavigateUp = {}
         )
     }

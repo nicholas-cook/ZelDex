@@ -27,12 +27,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -41,7 +44,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.nickcook.zeldex.NavigationEvent
 import com.nickcook.zeldex.R
 import com.nickcook.zeldex.components.ErrorState
 import com.nickcook.zeldex.core.data.model.CompendiumCategory
@@ -50,17 +56,26 @@ import com.nickcook.zeldex.ui.theme.ZelDexTheme
 
 @Composable
 fun CompendiumListRoute(
-    onNavigateUp: () -> Unit,
-    onItemClicked: (Int) -> Unit,
+    navController: NavController,
     viewModel: CompendiumListViewModel = hiltViewModel()
 ) {
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+    val navigationEvent by viewModel.navigationEvent.collectAsStateWithLifecycle()
+    LaunchedEffect(key1 = navigationEvent) {
+        if (navigationEvent is NavigationEvent.NavigateBack) {
+            navController.popBackStack()
+            viewModel.onNavigated()
+        } else if (navigationEvent is NavigationEvent.NavigateToEntry) {
+            navController.navigate((navigationEvent as NavigationEvent.NavigateToEntry).route)
+            viewModel.onNavigated()
+        }
+    }
     CompendiumListScreen(
         screenState = screenState,
-        onItemClicked = onItemClicked,
+        onItemClicked = viewModel::onEntryClicked,
         onSearch = viewModel::searchEntries,
         onRefresh = viewModel::refreshList,
-        onNavigateUp = onNavigateUp
+        onNavigateUp = viewModel::onBackClicked
     )
 }
 
@@ -82,7 +97,7 @@ fun CompendiumListScreen(
     }) { paddingValues ->
         when (screenState) {
             is CompendiumListScreenState.Error -> {
-                ErrorState()
+                ErrorState(onTryAgainClick = onRefresh)
             }
 
             is CompendiumListScreenState.Loading -> {
@@ -100,6 +115,7 @@ fun CompendiumListScreen(
                 val listEntries = screenState.listEntries
                 LazyColumn(
                     modifier = Modifier
+                        .testTag("compendium_list")
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
@@ -203,7 +219,7 @@ private fun ListTopBar(
                         IconButton(onClick = onRefresh) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = null
+                                contentDescription = stringResource(id = R.string.cd_refresh)
                             )
                         }
                     }
@@ -276,7 +292,10 @@ fun CompendiumListItem(entry: CompendiumEntry, onItemClicked: (Int) -> Unit) {
             }
         )
         AsyncImage(
-            model = entry.image,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(entry.image)
+                .crossfade(true)
+                .build(),
             contentDescription = null,
             modifier = Modifier
                 .size(100.dp)
